@@ -1,0 +1,44 @@
+# ============================================
+# .clinerules — Intranet de Treinamentos
+# ============================================
+
+## Contexto do Projeto
+Intranet corporativa de treinamentos com dois perfis:
+- Usuário: assiste conteúdos (PDF/vídeo), progresso salvo automaticamente
+- Admin: gerencia conteúdos, visualiza progresso de todos os usuários
+Backend: Supabase (auth, banco, storage)
+Frontend: Next.js 14 (App Router) + Tailwind CSS + TypeScript
+
+## Stack e Padrões
+- Sempre usar TypeScript em todos os arquivos
+- Componentes: functional components com hooks
+- Estilização: Tailwind CSS, sem CSS-in-JS
+- Imports do Supabase: sempre via @/lib/supabase
+- Variáveis de ambiente: nunca hardcodar chaves, usar .env.local
+
+## Banco de Dados (Supabase MCP)
+- SEMPRE usar o MCP do Supabase para qualquer operação no banco
+- NUNCA executar DELETE ou DROP sem confirmar comigo primeiro
+- NUNCA alterar tabelas existentes sem mostrar o SQL antes
+- Ao criar tabelas, sempre incluir: id (uuid), created_at, updated_at
+- RLS (Row Level Security) deve estar ativo em todas as tabelas
+- Policies de RLS: separar permissões de usuário e admin
+
+## Tabelas Principais
+- users: perfil do usuário (id, name, email, role, sector_id)
+- sectors: setores da empresa (id, name)
+- contents: treinamentos (id, title, type [pdf|video], url, sector_id, created_by)
+- progress: progresso (id, user_id, content_id, position, completed, updated_at)
+
+## Regras de Negócio
+- Progresso salvo a cada 10s (vídeo) ou a cada virada de página (PDF)
+- Conteúdo marcado como "concluído" apenas quando assistido/lido 90%+
+- Admin vê todos os usuários; usuário vê apenas o próprio progresso
+- Conteúdos podem ser globais (todos setores) ou por setor específico
+
+## Comportamento do Agente
+- Antes de criar qualquer arquivo, mostre o plano completo e aguarde aprovação
+- Ao criar uma feature, crie também os tipos TypeScript correspondentes
+- Sempre gere os tipos do Supabase atualizados após alterar o schema
+- Prefira editar arquivos existentes a criar novos desnecessariamente
+- Ao encontrar um erro, mostre a causa antes de corrigir

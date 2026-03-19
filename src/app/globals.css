@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gogrow-red: #E30613;
+  --color-gogrow-red-hover: #b3040f;
+  --color-gogrow-black: #0D0D0D;
+  --color-gogrow-gray-dark: #1A1A1A;
+  --color-gogrow-gray-light: #F5F5F5;
+  --color-gogrow-white: #FFFFFF;
+
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+:root {
+  --background: var(--color-gogrow-white);
+  --foreground: var(--color-gogrow-black);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--color-gogrow-black);
+    --foreground: var(--color-gogrow-white);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+@layer utilities {
+  .bg-black-gradient {
+    background: linear-gradient(180deg, #1f1f1f 0%, #000000 100%);
+  }
+  .bg-red-gradient {
+    background: linear-gradient(135deg, #e30613 0%, #a0030d 100%);
+  }
+}
