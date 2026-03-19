@@ -33,6 +33,11 @@ export default function VideoPlayer({ contentId, url, title }: { contentId: stri
     }
   }
 
+  const handleMarkAsCompleted = () => {
+    const currentTime = playerRef.current?.getCurrentTime() || 0;
+    saveProgress(currentTime, true);
+  };
+
   if (loading) return <div>Carregando progresso...</div>
 
   const Player = ReactPlayer as any;
@@ -40,11 +45,19 @@ export default function VideoPlayer({ contentId, url, title }: { contentId: stri
   return (
     <div className="w-full flex-1 flex flex-col items-center bg-black/5 rounded-xl border p-4 shadow-sm relative overflow-hidden">
       
-      {completed && (
-        <div className="absolute top-4 right-4 z-10 bg-green-500 text-white px-3 py-1 flex items-center gap-2 rounded-full font-medium shadow-lg animate-pulse">
+      {completed ? (
+        <div className="absolute top-4 right-4 z-10 bg-green-500 text-white px-3 py-1 flex items-center gap-2 rounded-full font-medium shadow-lg">
           <CheckCircle2 size={16} />
           <span>Concluído</span>
         </div>
+      ) : (
+        <button 
+          onClick={handleMarkAsCompleted} 
+          className="absolute top-4 right-4 z-10 bg-green-500 hover:bg-green-600 text-white px-3 py-1 flex items-center gap-2 rounded-full font-medium shadow-lg transition-colors text-sm"
+        >
+          <CheckCircle2 size={16} />
+          <span>Marcar como concluído</span>
+        </button>
       )}
 
       <div className="w-full max-w-5xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl relative border-4 border-gogrow-gray-dark">

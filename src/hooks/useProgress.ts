@@ -6,9 +6,11 @@ export function useProgress(contentId: string) {
   const [completed, setCompleted] = useState(false)
   const [loading, setLoading] = useState(true)
   const userRef = useRef<{ id: string } | null>(null)
-  const supabase = createClient()
+  const supabaseRef = useRef(createClient())
+  const completedRef = useRef(false)
 
   useEffect(() => {
+    const supabase = supabaseRef.current
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -27,6 +29,7 @@ export function useProgress(contentId: string) {
       if (data) {
         setPosition(data.position || 0)
         setCompleted(data.completed || false)
+        completedRef.current = data.completed || false
       }
       setLoading(false)
     }
@@ -35,17 +38,21 @@ export function useProgress(contentId: string) {
 
   const saveProgress = useCallback(async (newPos: number, isCompleted: boolean = false) => {
     if (!userRef.current) return
+    const supabase = supabaseRef.current
     setPosition(newPos)
-    if (isCompleted) setCompleted(true)
+    if (isCompleted) {
+      setCompleted(true)
+      completedRef.current = true
+    }
 
     await supabase.from('progress').upsert({
       user_id: userRef.current.id,
       content_id: contentId,
       position: newPos,
-      completed: completed || isCompleted,
+      completed: completedRef.current || isCompleted,
       updated_at: new Date().toISOString()
     })
-  }, [contentId, completed])
+  }, [contentId])
 
   return { position, completed, loading, saveProgress }
 }

@@ -3,11 +3,31 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function addContent(formData: FormData) {
+async function requireAdmin() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'admin') throw new Error('Forbidden')
+  return { supabase, user }
+}
+
+export async function addContent(formData: FormData) {
+  let supabase: Awaited<ReturnType<typeof createClient>>
+  let user: { id: string }
+  try {
+    const result = await requireAdmin()
+    supabase = result.supabase
+    user = result.user
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
 
   const title = formData.get('title') as string
   const type = formData.get('type') as string
@@ -33,7 +53,13 @@ export async function addContent(formData: FormData) {
 }
 
 export async function deleteContent(contentId: string) {
-  const supabase = await createClient()
+  let supabase: Awaited<ReturnType<typeof createClient>>
+  try {
+    const result = await requireAdmin()
+    supabase = result.supabase
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
   
   const { error } = await supabase.from('contents').delete().eq('id', contentId)
 
@@ -48,10 +74,13 @@ export async function deleteContent(contentId: string) {
 }
 
 export async function addSector(formData: FormData) {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+  let supabase: Awaited<ReturnType<typeof createClient>>
+  try {
+    const result = await requireAdmin()
+    supabase = result.supabase
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
 
   const name = formData.get('name') as string
 
@@ -69,7 +98,13 @@ export async function addSector(formData: FormData) {
 }
 
 export async function deleteSector(sectorId: string) {
-  const supabase = await createClient()
+  let supabase: Awaited<ReturnType<typeof createClient>>
+  try {
+    const result = await requireAdmin()
+    supabase = result.supabase
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
 
   const { error } = await supabase.from('sectors').delete().eq('id', sectorId)
 
