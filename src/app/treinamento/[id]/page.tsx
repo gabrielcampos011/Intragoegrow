@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import VideoPlayer from '@/components/player/VideoPlayer'
 import PdfViewer from '@/components/player/PdfViewer'
+import LinkViewer from '@/components/player/LinkViewer'
 import { normalizeRole } from '@/lib/role'
 
 export default async function TreinamentoPage({ params }: { params: Promise<{ id: string }> }) {
@@ -70,6 +71,8 @@ export default async function TreinamentoPage({ params }: { params: Promise<{ id
       <main className="flex-1 p-6 md:p-8 flex flex-col items-center">
         {content.type === 'video' ? (
           <VideoPlayer contentId={content.id} url={content.url} title={content.title} />
+        ) : content.type === 'link' ? (
+          <LinkViewer contentId={content.id} url={content.url} title={content.title} />
         ) : (
           <PdfViewer contentId={content.id} url={content.url} />
         )}

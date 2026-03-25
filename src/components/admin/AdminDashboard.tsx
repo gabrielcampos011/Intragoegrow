@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Users, FileVideo, ChevronRight, Building2 } from 'lucide-react'
+import { Plus, Trash2, Pencil, Users, FileVideo, ChevronRight, Building2 } from 'lucide-react'
 import AddContentModal from './AddContentModal'
+import EditContentModal from './EditContentModal'
 import { deleteContent, addSector, deleteSector } from '@/app/admin/actions'
 
 export default function AdminDashboard({ users, progress, contents, sectors }: any) {
   const [activeTab, setActiveTab] = useState<'users' | 'contents' | 'sectors'>('users')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [editingContent, setEditingContent] = useState<any>(null)
   const [sectorName, setSectorName] = useState('')
   const [sectorLoading, setSectorLoading] = useState(false)
   const [sectorError, setSectorError] = useState('')
@@ -98,7 +100,7 @@ export default function AdminDashboard({ users, progress, contents, sectors }: a
                         </td>
                         <td className="p-3 text-sm text-gray-600">
                           {p?.position !== null && p?.position !== undefined
-                            ? (c.type === 'video' ? `${Math.floor(p.position)}s assistidos` : `Página ${p.position}`)
+                            ? (c.type === 'video' ? `${Math.floor(p.position)}s assistidos` : c.type === 'link' ? 'Link visitado' : `Página ${p.position}`)
                             : '--'}
                         </td>
                       </tr>
@@ -225,13 +227,22 @@ export default function AdminDashboard({ users, progress, contents, sectors }: a
                     </span>
                   </td>
                   <td className="p-4 text-right">
-                    <button
-                      onClick={() => handleDeleteContent(content.id)}
-                      className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Excluir"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => setEditingContent(content)}
+                        className="text-gray-500 hover:text-gogrow-red p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Editar"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteContent(content.id)}
+                        className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Excluir"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -313,6 +324,10 @@ export default function AdminDashboard({ users, progress, contents, sectors }: a
 
       {isAddModalOpen && (
         <AddContentModal sectors={sectors} onClose={() => setIsAddModalOpen(false)} />
+      )}
+
+      {editingContent && (
+        <EditContentModal content={editingContent} sectors={sectors} onClose={() => setEditingContent(null)} />
       )}
     </div>
   )

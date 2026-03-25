@@ -2,7 +2,7 @@
 
 import { useContents } from '@/hooks/useContents'
 import Link from 'next/link'
-import { Play, FileText, CheckCircle, BookOpen } from 'lucide-react'
+import { Play, FileText, ExternalLink, CheckCircle, BookOpen } from 'lucide-react'
 
 export default function DashboardClient({ userSectorId }: { userSectorId: string | null }) {
   const { contents, progress, loading } = useContents(userSectorId)
@@ -52,6 +52,8 @@ export default function DashboardClient({ userSectorId }: { userSectorId: string
               <div className="h-32 bg-gogrow-gray-light flex items-center justify-center relative overflow-hidden group-hover:bg-gogrow-red/5 transition-colors">
                 {item.type === 'video' ? (
                   <Play size={40} className="text-gogrow-red/40 group-hover:text-gogrow-red transition-colors" />
+                ) : item.type === 'link' ? (
+                  <ExternalLink size={40} className="text-gogrow-red/40 group-hover:text-gogrow-red transition-colors" />
                 ) : (
                   <FileText size={40} className="text-gogrow-red/40 group-hover:text-gogrow-red transition-colors" />
                 )}
@@ -64,7 +66,7 @@ export default function DashboardClient({ userSectorId }: { userSectorId: string
               
               <div className="p-4 flex-1 flex flex-col">
                 <div className="text-xs font-semibold text-gogrow-red uppercase tracking-wider mb-1">
-                  {item.sectors?.name ? item.sectors.name : 'Global'} • {item.type === 'video' ? 'Vídeo' : 'PDF'}
+                  {item.sectors?.name ? item.sectors.name : 'Global'} • {item.type === 'video' ? 'Vídeo' : item.type === 'link' ? 'Link' : 'PDF'}
                 </div>
                 <h3 className="font-bold text-gogrow-black line-clamp-2 mb-4 flex-1">
                   {item.title}

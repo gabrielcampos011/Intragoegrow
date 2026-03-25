@@ -74,6 +74,37 @@ export async function deleteContent(contentId: string) {
   return { success: true }
 }
 
+export async function updateContent(contentId: string, formData: FormData) {
+  let supabase: Awaited<ReturnType<typeof createClient>>
+  try {
+    const result = await requireAdmin()
+    supabase = result.supabase
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+
+  const title = formData.get('title') as string
+  const type = formData.get('type') as string
+  const url = formData.get('url') as string
+  const sector_id = formData.get('sector_id') as string
+
+  const { error } = await supabase.from('contents').update({
+    title,
+    type,
+    url,
+    sector_id: sector_id === 'global' ? null : sector_id,
+  }).eq('id', contentId)
+
+  if (error) {
+    console.error('Error updating content', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
 export async function addSector(formData: FormData) {
   let supabase: Awaited<ReturnType<typeof createClient>>
   try {
