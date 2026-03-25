@@ -1,17 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import AdminDashboard from '@/components/admin/AdminDashboard'
+import { normalizeRole } from '@/lib/role'
 
 export default async function AdminPage() {
   const supabase = await createClient()
 
   // Buscar todos os usuários
-  const { data: users } = await supabase
+  const { data: usersRaw } = await supabase
     .from('profiles')
     .select(`
-      id, name, email:id, role,
-      sectors(name)
+      id, name, role, sector_id,
+      sectors(id, name)
     `)
-    .eq('role', 'user')
+
+  const users = (usersRaw || []).filter((u: any) => normalizeRole(u.role) !== 'admin')
 
   // Buscar progresso
   const { data: progress } = await supabase

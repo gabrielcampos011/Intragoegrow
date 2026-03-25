@@ -24,6 +24,7 @@ export function useContents(userSectorId: string | null) {
   useEffect(() => {
     async function fetchContents() {
       const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
       
       const query = supabase
         .from('contents')
@@ -36,10 +37,14 @@ export function useContents(userSectorId: string | null) {
       }
 
       const { data: contentsData, error: contentsError } = await query
-      
-      const { data: progressData } = await supabase
-        .from('progress')
-        .select('content_id, position, completed')
+    
+      // Progresso do usuário logado (evita depender apenas de RLS)
+      const { data: progressData } = user
+        ? await supabase
+          .from('progress')
+          .select('content_id, position, completed')
+          .eq('user_id', user.id)
+        : { data: [] }
 
       if (!contentsError && contentsData) {
         setContents(contentsData as any)

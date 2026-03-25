@@ -1,0 +1,40 @@
+Faça uma revisão completa do projeto atual antes de qualquer coisa.
+Leia todos os arquivos relevantes do projeto — estrutura de pastas, banco de dados, rotas, componentes, autenticação e lógica de permissões — para ter contexto total do que foi construído até agora.
+
+🔍 Diagnóstico que precisa ser feito:
+Após a leitura completa, identifique e documente:
+
+O que está funcionando corretamente
+O que está quebrado ou incompleto, incluindo:
+
+Bug crítico confirmado: O usuário gabriel.campos@goegrow.com.br está cadastrado como admin no banco de dados, mas o sistema exibe sua função como "Colaborador" na interface. A lógica de roles/permissões está com defeito — isso precisa ser rastreado da origem (banco → back-end → front-end)
+Quaisquer outros pontos de falha encontrados na revisão
+
+
+
+
+🎯 Funcionalidades que precisam estar operando ao fim:
+Para o perfil Admin:
+
+Capacidade de adicionar conteúdos (vídeos, documentos, módulos, etc.) que serão exibidos aos colaboradores
+Painel/lista de rastreamento de progresso por usuário, exibindo:
+
+Quais conteúdos cada colaborador já visualizou
+Até onde chegou em cada conteúdo (ex: parou no minuto 4:32 de um vídeo, ou na página 3 de um PDF)
+
+
+
+Para o perfil Colaborador:
+
+Visualizar os conteúdos disponibilizados pelo admin
+Ter seu progresso salvo automaticamente
+
+
+📋 Entrega esperada:
+Com base no diagnóstico, estruture um plano de ação priorizado contendo:
+
+Correções imediatas (bugs críticos como o de roles)
+Implementações pendentes necessárias para o app funcionar de ponta a ponta
+Ajustes de UX/lógica identificados durante a revisão
+
+Não escreva código ainda — primeiro apresente o plano completo para validação.

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { UserCircle, Building2, ShieldCheck, Mail } from 'lucide-react'
+import { normalizeRole } from '@/lib/role'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -13,6 +14,8 @@ export default async function ProfilePage() {
     .select('name, role, sector_id, sectors(name)')
     .eq('id', user.id)
     .single()
+
+  const role = normalizeRole(profile?.role)
 
   // Progresso do usuário
   const { data: progress } = await supabase
@@ -61,7 +64,9 @@ export default async function ProfilePage() {
             <ShieldCheck className="text-gogrow-red shrink-0" size={22} />
             <div>
               <p className="text-xs uppercase text-gray-400 font-semibold mb-0.5">Função</p>
-              <p className="font-medium text-gogrow-black capitalize">{profile?.role === 'admin' ? 'Administrador' : 'Colaborador'}</p>
+              <p className="font-medium text-gogrow-black capitalize">
+                {role === 'admin' ? 'Administrador' : 'Colaborador'}
+              </p>
             </div>
           </div>
         </div>

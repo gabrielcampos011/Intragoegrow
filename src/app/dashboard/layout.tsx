@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOut, LayoutDashboard, Settings, UserCircle } from 'lucide-react'
+import { normalizeRole } from '@/lib/role'
 
 export default async function DashboardLayout({
   children,
@@ -23,6 +24,8 @@ export default async function DashboardLayout({
     .select('name, role')
     .eq('id', user.id)
     .single()
+
+  const role = normalizeRole(profile?.role)
 
   return (
     <div className="min-h-screen bg-gogrow-gray-light flex">
@@ -52,7 +55,7 @@ export default async function DashboardLayout({
             <span className="font-medium">Meu Perfil</span>
           </Link>
 
-          {profile?.role === 'admin' && (
+          {role === 'admin' && (
             <Link
               href="/admin"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-gray-300"
@@ -67,7 +70,9 @@ export default async function DashboardLayout({
           <div className="flex items-center justify-between px-2 mb-4">
             <div className="flex flex-col">
               <span className="font-medium text-sm">{profile?.name}</span>
-              <span className="text-xs text-gray-400 capitalize">{profile?.role}</span>
+              <span className="text-xs text-gray-400 capitalize">
+                {role === 'admin' ? 'Administrador' : 'Colaborador'}
+              </span>
             </div>
           </div>
           <form action="/auth/signout" method="post">

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { normalizeRole } from '@/lib/role'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -14,7 +15,7 @@ async function requireAdmin() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') throw new Error('Forbidden')
+  if (normalizeRole(profile?.role) !== 'admin') throw new Error('Forbidden')
   return { supabase, user }
 }
 

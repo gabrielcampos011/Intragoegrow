@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOut, LayoutDashboard, Settings, Users, FileVideo } from 'lucide-react'
+import { normalizeRole } from '@/lib/role'
 
 export default async function AdminLayout({
   children,
@@ -24,7 +25,9 @@ export default async function AdminLayout({
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') {
+  const role = normalizeRole(profile?.role)
+
+  if (role !== 'admin') {
     redirect('/dashboard')
   }
 
@@ -61,7 +64,9 @@ export default async function AdminLayout({
           <div className="flex items-center justify-between px-2 mb-4">
             <div className="flex flex-col">
               <span className="font-medium text-sm">{profile?.name}</span>
-              <span className="text-xs text-gogrow-red capitalize font-bold">{profile?.role}</span>
+              <span className="text-xs text-gogrow-red capitalize font-bold">
+                {role === 'admin' ? 'Administrador' : 'Colaborador'}
+              </span>
             </div>
           </div>
           <form action="/auth/signout" method="post">

@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { normalizeRole } from '@/lib/role'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -37,54 +38,42 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup')
-  
+
   if (!user && !isAuthRoute) {
-    // no user, redirect to login unless on public routes
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // Se estiver logado e tentar acessar /login, deve redirecionar dependendo da role
-  if (user && isAuthRoute) {
+  // Buscar profile uma única vez para todas as verificações de role
+  const needsRoleCheck = user && (isAuthRoute || request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname === '/')
+  let role: ReturnType<typeof normalizeRole> | null = null
+
+  if (needsRoleCheck) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
+    role = normalizeRole(profile?.role)
+  }
 
-    const role = profile?.role || 'user'
-    
+  // Se estiver logado e tentar acessar /login ou /signup, redirecionar baseado na role
+  if (user && isAuthRoute) {
     const url = request.nextUrl.clone()
     url.pathname = role === 'admin' ? '/admin' : '/dashboard'
     return NextResponse.redirect(url)
   }
 
   // Restrição de admin: apenas admins podem acessar /admin
-  if (user && request.nextUrl.pathname.startsWith('/admin')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profile?.role !== 'admin') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
-    }
+  if (user && request.nextUrl.pathname.startsWith('/admin') && role !== 'admin') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
   }
 
-  // Restrição de usuário: users comuns não precisam acessar a raiz, redirecionamos para o /dashboard também
+  // Raiz: redirecionar para dashboard ou admin
   if (user && request.nextUrl.pathname === '/') {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    const role = profile?.role || 'user'
-    
     const url = request.nextUrl.clone()
     url.pathname = role === 'admin' ? '/admin' : '/dashboard'
     return NextResponse.redirect(url)

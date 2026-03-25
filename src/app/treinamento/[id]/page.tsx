@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import VideoPlayer from '@/components/player/VideoPlayer'
 import PdfViewer from '@/components/player/PdfViewer'
+import { normalizeRole } from '@/lib/role'
 
 export default async function TreinamentoPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
@@ -13,11 +14,29 @@ export default async function TreinamentoPage({ params }: { params: Promise<{ id
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: content, error } = await supabase
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('sector_id, role')
+    .eq('id', user.id)
+    .single()
+
+  // Colaborador só enxerga global + do próprio setor; admin enxerga tudo.
+  const role = normalizeRole(profile?.role)
+
+  let contentQuery = supabase
     .from('contents')
     .select('*')
     .eq('id', id)
-    .single()
+
+  if (role !== 'admin') {
+    if (profile?.sector_id) {
+      contentQuery = contentQuery.or(`sector_id.is.null,sector_id.eq.${profile.sector_id}`)
+    } else {
+      contentQuery = contentQuery.is('sector_id', null)
+    }
+  }
+
+  const { data: content, error } = await contentQuery.single()
 
   if (error || !content) {
     return (

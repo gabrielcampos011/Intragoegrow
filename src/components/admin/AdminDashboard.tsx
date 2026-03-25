@@ -90,14 +90,16 @@ export default function AdminDashboard({ users, progress, contents, sectors }: a
                         <td className="p-3">
                           {p?.completed ? (
                             <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold">Concluído</span>
-                          ) : p?.position ? (
+                          ) : p?.position !== null && p?.position !== undefined ? (
                             <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold">Em Andamento</span>
                           ) : (
                             <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-bold">Não Iniciado</span>
                           )}
                         </td>
                         <td className="p-3 text-sm text-gray-600">
-                          {p?.position ? (c.type === 'video' ? `${Math.floor(p.position)}s assistidos` : `Página ${p.position}`) : '--'}
+                          {p?.position !== null && p?.position !== undefined
+                            ? (c.type === 'video' ? `${Math.floor(p.position)}s assistidos` : `Página ${p.position}`)
+                            : '--'}
                         </td>
                       </tr>
                     )
