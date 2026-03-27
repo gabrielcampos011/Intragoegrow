@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export function useProgress(contentId: string) {
+export function useProgress(contentId: string, initialUserId?: string) {
   const [position, setPosition] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -11,21 +11,25 @@ export function useProgress(contentId: string) {
 
   useEffect(() => {
     const supabase = supabaseRef.current
+
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setLoading(false)
-        return
+      let userId = initialUserId
+
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { setLoading(false); return }
+        userId = user.id
       }
-      userRef.current = { id: user.id }
+
+      userRef.current = { id: userId }
 
       const { data } = await supabase
         .from('progress')
         .select('position, completed')
         .eq('content_id', contentId)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle()
-      
+
       if (data) {
         setPosition(data.position || 0)
         setCompleted(data.completed || false)
@@ -33,10 +37,11 @@ export function useProgress(contentId: string) {
       }
       setLoading(false)
     }
-    init()
-  }, [contentId])
 
-  const saveProgress = useCallback(async (newPos: number, isCompleted: boolean = false) => {
+    init()
+  }, [contentId, initialUserId])
+
+  const saveProgress = useCallback(async (newPos: number, isCompleted = false) => {
     if (!userRef.current) return
     const supabase = supabaseRef.current
     setPosition(newPos)
@@ -50,7 +55,7 @@ export function useProgress(contentId: string) {
       content_id: contentId,
       position: newPos,
       completed: completedRef.current || isCompleted,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
   }, [contentId])
 

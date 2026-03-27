@@ -2,22 +2,16 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { UserCircle, Building2, ShieldCheck, Mail } from 'lucide-react'
 import { normalizeRole } from '@/lib/role'
+import { getAuthUser, getProfile } from '@/lib/supabase/auth'
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name, role, sector_id, sectors(name)')
-    .eq('id', user.id)
-    .single()
-
+  const profile = await getProfile(user.id)
   const role = normalizeRole(profile?.role)
 
-  // Progresso do usuário
+  const supabase = await createClient()
   const { data: progress } = await supabase
     .from('progress')
     .select('content_id, completed, contents(title, type)')

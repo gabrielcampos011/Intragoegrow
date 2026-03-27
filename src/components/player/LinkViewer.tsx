@@ -3,8 +3,8 @@
 import { useProgress } from '@/hooks/useProgress'
 import { CheckCircle2, ExternalLink } from 'lucide-react'
 
-export default function LinkViewer({ contentId, url, title }: { contentId: string, url: string, title: string }) {
-  const { completed, loading, saveProgress } = useProgress(contentId)
+export default function LinkViewer({ contentId, url, title, userId }: { contentId: string, url: string, title: string, userId?: string }) {
+  const { completed, loading, saveProgress } = useProgress(contentId, userId)
 
   const handleOpenLink = () => {
     window.open(url, '_blank', 'noopener,noreferrer')

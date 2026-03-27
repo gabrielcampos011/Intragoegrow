@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Pencil, Users, FileVideo, ChevronRight, Building2 } from 'lucide-react'
+import { Plus, Trash2, Pencil, Users, FileVideo, ChevronRight, Building2, Download } from 'lucide-react'
 import AddContentModal from './AddContentModal'
 import EditContentModal from './EditContentModal'
 import { deleteContent, addSector, deleteSector } from '@/app/admin/actions'
@@ -38,6 +38,35 @@ export default function AdminDashboard({ users, progress, contents, sectors }: a
       setSectorError(result?.error || 'Erro ao criar setor')
     }
     setSectorLoading(false)
+  }
+
+  const handleExportCSV = () => {
+    const rows: string[][] = [
+      ['Colaborador', 'E-mail', 'Setor', 'Treinamento', 'Tipo', 'Status', 'Posição'],
+    ]
+
+    users.forEach((user: any) => {
+      const userContents = contents.filter(
+        (c: any) => c.sector_id === null || c.sector_id === user.sectors?.id
+      )
+      userContents.forEach((c: any) => {
+        const p = progress.find((pr: any) => pr.user_id === user.id && pr.content_id === c.id)
+        const status = p?.completed ? 'Concluído' : p?.position ? 'Em andamento' : 'Não iniciado'
+        const pos = p?.position != null
+          ? (c.type === 'video' ? `${Math.floor(p.position)}s` : c.type === 'pdf' ? `Pág. ${p.position}` : 'visitado')
+          : '-'
+        rows.push([user.name, '', user.sectors?.name || 'Sem setor', c.title, c.type, status, pos])
+      })
+    })
+
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `progresso-treinamentos-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   const handleDeleteSector = async (id: string) => {
@@ -143,6 +172,16 @@ export default function AdminDashboard({ users, progress, contents, sectors }: a
       {/* ABA: USUÁRIOS */}
       {activeTab === 'users' && (
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+          <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
+            <h3 className="font-bold text-lg">Colaboradores</h3>
+            <button
+              onClick={handleExportCSV}
+              className="px-4 py-2 border rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-100 transition-colors"
+            >
+              <Download size={16} />
+              Exportar CSV
+            </button>
+          </div>
           <table className="w-full text-left">
             <thead>
               <tr className="border-b bg-gray-50">

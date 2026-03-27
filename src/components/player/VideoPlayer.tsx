@@ -5,8 +5,8 @@ import ReactPlayer from 'react-player'
 import { useProgress } from '@/hooks/useProgress'
 import { CheckCircle2 } from 'lucide-react'
 
-export default function VideoPlayer({ contentId, url, title }: { contentId: string, url: string, title: string }) {
-  const { position, completed, loading, saveProgress } = useProgress(contentId)
+export default function VideoPlayer({ contentId, url, title, userId }: { contentId: string, url: string, title: string, userId?: string }) {
+  const { position, completed, loading, saveProgress } = useProgress(contentId, userId)
   const playerRef = useRef<any>(null)
   
   // Track if we've seeked to the initial position

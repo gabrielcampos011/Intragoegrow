@@ -34,11 +34,20 @@ export async function addContent(formData: FormData) {
   const type = formData.get('type') as string
   const url = formData.get('url') as string
   const sector_id = formData.get('sector_id') as string
+  const cover_url = (formData.get('cover_url') as string) || null
+  const description = (formData.get('description') as string) || null
+  const due_date = (formData.get('due_date') as string) || null
+  const duration_raw = formData.get('duration_minutes') as string
+  const duration_minutes = duration_raw ? parseInt(duration_raw, 10) : null
 
   const { error } = await supabase.from('contents').insert({
     title,
     type,
     url,
+    cover_url,
+    description,
+    due_date,
+    duration_minutes,
     sector_id: sector_id === 'global' ? null : sector_id,
     created_by: user.id
   })
@@ -87,11 +96,20 @@ export async function updateContent(contentId: string, formData: FormData) {
   const type = formData.get('type') as string
   const url = formData.get('url') as string
   const sector_id = formData.get('sector_id') as string
+  const cover_url = (formData.get('cover_url') as string) || null
+  const description = (formData.get('description') as string) || null
+  const due_date = (formData.get('due_date') as string) || null
+  const duration_raw = formData.get('duration_minutes') as string
+  const duration_minutes = duration_raw ? parseInt(duration_raw, 10) : null
 
   const { error } = await supabase.from('contents').update({
     title,
     type,
     url,
+    cover_url,
+    description,
+    due_date,
+    duration_minutes,
     sector_id: sector_id === 'global' ? null : sector_id,
   }).eq('id', contentId)
 

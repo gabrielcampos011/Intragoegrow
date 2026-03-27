@@ -1,29 +1,24 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Clock, Calendar } from 'lucide-react'
 import VideoPlayer from '@/components/player/VideoPlayer'
 import PdfViewer from '@/components/player/PdfViewer'
 import LinkViewer from '@/components/player/LinkViewer'
 import { normalizeRole } from '@/lib/role'
+import { getAuthUser, getProfile } from '@/lib/supabase/auth'
 
 export default async function TreinamentoPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
   const { id } = resolvedParams
-  const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('sector_id, role')
-    .eq('id', user.id)
-    .single()
-
-  // Colaborador só enxerga global + do próprio setor; admin enxerga tudo.
+  const profile = await getProfile(user.id)
   const role = normalizeRole(profile?.role)
 
+  const supabase = await createClient()
   let contentQuery = supabase
     .from('contents')
     .select('*')
@@ -67,14 +62,37 @@ export default async function TreinamentoPage({ params }: { params: Promise<{ id
         </h1>
       </header>
 
+      {/* Meta: descrição + duração + prazo */}
+      {(content.description || content.duration_minutes || content.due_date) && (
+        <div className="bg-white border-b px-6 py-3 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+          {content.description && (
+            <p className="flex-1 min-w-0 truncate">{content.description}</p>
+          )}
+          <div className="flex items-center gap-4 shrink-0 ml-auto">
+            {content.duration_minutes && (
+              <span className="flex items-center gap-1.5">
+                <Clock size={14} className="text-gogrow-red" />
+                {content.duration_minutes} min
+              </span>
+            )}
+            {content.due_date && (
+              <span className="flex items-center gap-1.5">
+                <Calendar size={14} className="text-gogrow-red" />
+                Prazo: {new Date(content.due_date + 'T00:00:00').toLocaleDateString('pt-BR')}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Main Content Viewer */}
-      <main className="flex-1 p-6 md:p-8 flex flex-col items-center">
+      <main className="flex-1 p-4 md:p-8 flex flex-col items-center">
         {content.type === 'video' ? (
-          <VideoPlayer contentId={content.id} url={content.url} title={content.title} />
+          <VideoPlayer contentId={content.id} url={content.url} title={content.title} userId={user.id} />
         ) : content.type === 'link' ? (
-          <LinkViewer contentId={content.id} url={content.url} title={content.title} />
+          <LinkViewer contentId={content.id} url={content.url} title={content.title} userId={user.id} />
         ) : (
-          <PdfViewer contentId={content.id} url={content.url} />
+          <PdfViewer contentId={content.id} url={content.url} userId={user.id} />
         )}
       </main>
     </div>

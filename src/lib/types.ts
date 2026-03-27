@@ -16,8 +16,12 @@ export type Database = {
     Tables: {
       contents: {
         Row: {
+          cover_url: string | null
           created_at: string | null
           created_by: string | null
+          description: string | null
+          due_date: string | null
+          duration_minutes: number | null
           id: string
           sector_id: string | null
           title: string
@@ -26,8 +30,12 @@ export type Database = {
           url: string
         }
         Insert: {
+          cover_url?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          duration_minutes?: number | null
           id?: string
           sector_id?: string | null
           title: string
@@ -36,8 +44,12 @@ export type Database = {
           url: string
         }
         Update: {
+          cover_url?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          duration_minutes?: number | null
           id?: string
           sector_id?: string | null
           title?: string

@@ -1,22 +1,32 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import { useProgress } from '@/hooks/useProgress'
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString()
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
-export default function PdfViewer({ contentId, url }: { contentId: string, url: string }) {
-  const { position, completed, loading, saveProgress } = useProgress(contentId)
+export default function PdfViewer({ contentId, url, userId }: { contentId: string, url: string, userId?: string }) {
+  const { position, completed, loading, saveProgress } = useProgress(contentId, userId)
   const [numPages, setNumPages] = useState<number>()
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [docLoading, setDocLoading] = useState(true)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [pageWidth, setPageWidth] = useState(800)
+
+  useEffect(() => {
+    const update = () => {
+      if (containerRef.current) {
+        setPageWidth(Math.min(800, containerRef.current.clientWidth - 32))
+      }
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   // Sync initial page
   useEffect(() => {
@@ -78,7 +88,7 @@ export default function PdfViewer({ contentId, url }: { contentId: string, url: 
         </button>
       </div>
 
-      <div className="flex-1 w-full max-w-5xl overflow-auto border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center relative min-h-[600px]">
+      <div ref={containerRef} className="flex-1 w-full max-w-5xl overflow-auto border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 flex items-center justify-center relative min-h-[400px]">
         
         {docLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-3 z-0">
@@ -93,12 +103,12 @@ export default function PdfViewer({ contentId, url }: { contentId: string, url: 
           className="flex justify-center z-10 w-full"
           loading={null}
         >
-          <Page 
-            pageNumber={pageNumber} 
-            renderTextLayer={true} 
+          <Page
+            pageNumber={pageNumber}
+            renderTextLayer={true}
             renderAnnotationLayer={true}
             className="shadow-xl"
-            width={800}
+            width={pageWidth}
           />
         </Document>
       </div>

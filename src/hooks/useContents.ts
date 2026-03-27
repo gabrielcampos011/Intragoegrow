@@ -6,6 +6,10 @@ export type ContentItem = {
   title: string
   type: string
   url: string
+  cover_url: string | null
+  description: string | null
+  due_date: string | null
+  duration_minutes: number | null
   sector_id: string | null
   sectors?: { name: string } | null
 }
@@ -26,17 +30,15 @@ export function useContents(userSectorId: string | null) {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      const query = supabase
+      const baseQuery = supabase
         .from('contents')
-        .select(`id, title, type, url, sector_id, sectors(name)`)
-      
-      if (userSectorId) {
-        query.or(`sector_id.is.null,sector_id.eq.${userSectorId}`)
-      } else {
-        query.is('sector_id', null)
-      }
+        .select(`id, title, type, url, cover_url, description, due_date, duration_minutes, sector_id, sectors(name)`)
 
-      const { data: contentsData, error: contentsError } = await query
+      const filteredQuery = userSectorId
+        ? baseQuery.or(`sector_id.is.null,sector_id.eq.${userSectorId}`)
+        : baseQuery.is('sector_id', null)
+
+      const { data: contentsData, error: contentsError } = await filteredQuery
     
       // Progresso do usuário logado (evita depender apenas de RLS)
       const { data: progressData } = user

@@ -1,35 +1,21 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOut, LayoutDashboard, Settings, Users, FileVideo } from 'lucide-react'
 import { normalizeRole } from '@/lib/role'
+import { getAuthUser, getProfile } from '@/lib/supabase/auth'
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
+  const user = await getAuthUser()
+  if (!user) redirect('/login')
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name, role')
-    .eq('id', user.id)
-    .single()
-
+  const profile = await getProfile(user.id)
   const role = normalizeRole(profile?.role)
 
-  if (role !== 'admin') {
-    redirect('/dashboard')
-  }
+  if (role !== 'admin') redirect('/dashboard')
 
   return (
     <div className="min-h-screen bg-gogrow-gray-light flex">

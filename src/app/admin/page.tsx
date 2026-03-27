@@ -27,7 +27,7 @@ export default async function AdminPage() {
   const { data: contents } = await supabase
     .from('contents')
     .select(`
-      id, title, type, url, sector_id, created_at,
+      id, title, type, url, cover_url, description, due_date, duration_minutes, sector_id, created_at,
       sectors(name)
     `)
     
