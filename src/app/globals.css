@@ -17,12 +17,6 @@
   --foreground: var(--color-gogrow-black);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: var(--color-gogrow-black);
-    --foreground: var(--color-gogrow-white);
-  }
-}
 
 body {
   background: var(--background);

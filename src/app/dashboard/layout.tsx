@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { normalizeRole } from '@/lib/role'
 import { getAuthUser, getProfile } from '@/lib/supabase/auth'
 import Sidebar from '@/components/layout/Sidebar'
+import DashboardHeader from '@/components/layout/DashboardHeader'
 
 export default async function DashboardLayout({
   children,
@@ -19,10 +20,7 @@ export default async function DashboardLayout({
       <Sidebar name={profile?.name || ''} role={role} />
 
       <main className="flex-1 min-h-screen flex flex-col lg:ml-64">
-        <header className="h-16 bg-white border-b flex items-center px-8 shadow-sm shrink-0 sticky top-0 z-20">
-          <div className="lg:hidden w-10 shrink-0" />
-          <h1 className="text-xl font-bold text-gogrow-black">Portal do Colaborador</h1>
-        </header>
+        <DashboardHeader />
 
         <div className="flex-1 p-4 sm:p-6 lg:p-8">
           {children}

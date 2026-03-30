@@ -12,10 +12,20 @@ export default async function ProfilePage() {
   const role = normalizeRole(profile?.role)
 
   const supabase = await createClient()
-  const { data: progress } = await supabase
-    .from('progress')
-    .select('content_id, completed, contents(title, type)')
-    .eq('user_id', user.id)
+  const sectorId = profile?.sector_id ?? null
+
+  const [progressResult, contentsResult] = await Promise.all([
+    supabase
+      .from('progress')
+      .select('content_id, completed, contents(title, type)')
+      .eq('user_id', user.id),
+    sectorId
+      ? supabase.from('contents').select('id').or(`sector_id.is.null,sector_id.eq.${sectorId}`)
+      : supabase.from('contents').select('id').is('sector_id', null),
+  ])
+
+  const progress = progressResult.data
+  const totalAvailable = contentsResult.data?.length ?? 0
 
   const completed = (progress || []).filter(p => p.completed)
   const inProgress = (progress || []).filter(p => !p.completed && p.content_id)
@@ -71,7 +81,7 @@ export default async function ProfilePage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="bg-white border rounded-2xl shadow-sm p-6 text-center">
-          <div className="text-4xl font-extrabold text-gogrow-red">{(progress || []).length}</div>
+          <div className="text-4xl font-extrabold text-gogrow-red">{totalAvailable}</div>
           <div className="text-gray-500 mt-1 text-sm font-medium">Total disponível</div>
         </div>
         <div className="bg-white border rounded-2xl shadow-sm p-6 text-center">

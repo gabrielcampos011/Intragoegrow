@@ -190,8 +190,16 @@ export default function DashboardClient({
                     <div className="mt-auto pt-2">
                       <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1 overflow-hidden">
                         <div
-                          className={`h-1.5 rounded-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : prog?.position ? 'bg-gogrow-red animate-pulse' : 'bg-gray-300'}`}
-                          style={{ width: isCompleted ? '100%' : prog?.position ? '55%' : '0%' }}
+                          className={`h-1.5 rounded-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : prog?.position ? 'bg-gogrow-red' : 'bg-gray-300'}`}
+                          style={{
+                            width: isCompleted
+                              ? '100%'
+                              : prog?.position && item.type === 'video' && item.duration_minutes
+                                ? `${Math.min(Math.round((prog.position / (item.duration_minutes * 60)) * 100), 99)}%`
+                                : prog?.position
+                                  ? '30%'
+                                  : '0%'
+                          }}
                         />
                       </div>
                       <div className="text-right text-xs font-medium">
